@@ -5,3 +5,18 @@
   tasks:
     - name: echo?
       command: echo "hello world"
+    - name: change keyboard layout
+      become: yes
+      lineinfile:
+        path: "/etc/default/keyboard"
+        regexp: '^XKBLAYOUT='
+        line: 'XKBLAYOUT="fr"'
+      register: kbd_changed
+    - name: debug
+      debug:
+        var: kbd_changed
+    - name: reboot
+      become: yes
+      reboot:
+        msg: "Ansible reboot!"
+      when: kbd_changed.changed == true
