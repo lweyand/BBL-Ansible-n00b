@@ -1,0 +1,17 @@
+---
+
+- name: change keyboard layout
+  become: yes
+  lineinfile:
+    path: "{{ kbd_config_file }}"
+    regexp: '^XKBLAYOUT='
+    line: 'XKBLAYOUT="fr"'
+  register: kbd_changed
+- name: debug
+  debug:
+    var: kbd_changed
+- name: reboot
+  become: yes
+  reboot:
+    msg: "Ansible reboot!"
+  when: kbd_changed.changed == true

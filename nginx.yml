@@ -1,0 +1,12 @@
+---
+
+- name: install nginx
+  become: yes
+  apt:
+    name: nginx
+    state: present
+- name: deploy index file
+  become: yes
+  copy:
+    src: "{{ home_page_src }}"
+    dest: "{{ home_page_dest }}"
