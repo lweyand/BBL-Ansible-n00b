@@ -8,7 +8,7 @@
     - name: change keyboard layout
       become: yes
       lineinfile:
-        path: "/etc/default/keyboard"
+        path: "{{ kbd_config_file }}"
         regexp: '^XKBLAYOUT='
         line: 'XKBLAYOUT="fr"'
       register: kbd_changed
@@ -28,5 +28,5 @@
     - name: deploy index file
       become: yes
       copy:
-        src: "files/our_index.html"
-        dest: "/var/www/html/index.html"
+        src: "{{ home_page_src }}"
+        dest: "{{ home_page_dest }}"
