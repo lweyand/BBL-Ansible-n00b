@@ -20,3 +20,13 @@
       reboot:
         msg: "Ansible reboot!"
       when: kbd_changed.changed == true
+    - name: install nginx
+      become: yes
+      apt:
+        name: nginx
+        state: present
+    - name: deploy index file
+      become: yes
+      copy:
+        src: "files/our_index.html"
+        dest: "/var/www/html/index.html"
