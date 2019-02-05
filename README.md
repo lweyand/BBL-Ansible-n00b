@@ -165,7 +165,18 @@ home_page_dest: /var/www/html/index.html
 * Lancer le script
 
 ## step_07: refactoring: séparation des variables par fonctionnalités
-Pou plus de visibilité, séparer les variables de all.yml dans 2 fichier: **nginx.yml** et **os.yml**, et supprimer all.yml
+Pour plus de lisibilité, séparer les variables de inventory/group_vars/web/all.yml dans 2 fichiers:
+**inventory/group_vars/web/nginx.yml** et **inventory/group_vars/web/os.yml**, et supprimer all.yml
 
 ## step_08: refactoring: faire des includes dans le playbook
-TODO
+Toujours de la lisibilité, les tâches (tasks) du playbook, vont être réparties dans des fichiers dédiés.
+A la racine du projet, créé un fichier **os.yml**, et un **nginx.yml**.
+Y déplacer les *tasks* qui leur correspondent, et les inclures dans le fichier playbook.yml à l'aide du module **include_tasks**.
+```
+    - name: Modify OS
+      include_tasks:
+        file: os.yml
+    - name: Install and configure nginx
+      include_tasks:
+        file: nginx.yml
+```
