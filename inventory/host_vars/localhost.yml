@@ -1,4 +1,0 @@
----
-
-ansible_connection: local
-ansible_python_interpreter: /home/laurent/.virtualenv/ansible2.7/bin/python

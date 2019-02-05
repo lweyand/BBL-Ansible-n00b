@@ -1,4 +1,5 @@
-# Préparaion:
+# Préparation:
+
 * Effacer la VM et la recréer
     ```
     vagrant destroy
@@ -9,55 +10,72 @@
     source ~/.virtualenv/ansible2.7/bin/activate
     ```
 
+# Ansible
 
-* présentation Ansible
-* Immutabilité
-* Arborescence
-  * https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout
-* pattern/anti pattern
+## Présentation Ansible
 
+Ansible est une plate-forme logicielle libre pour la configuration et la gestion des ordinateurs. 
+Elle combine le déploiement de logiciels multi-nœuds, l'exécution des tâches ad-hoc, et la gestion de configuration. 
+Elle gère les différents nœuds à travers SSH et ne nécessite l'installation d'aucun logiciel supplémentaire sur ceux-ci. 
+Les modules communiquent via la sortie standard en notation JSON et peuvent être écrits dans n'importe quel langage de 
+programmation. Le système utilise YAML pour exprimer des descriptions réutilisables de systèmes, appelés playbook2.
 
-* écriture playbook:
-    * Installer Nginx
-    * changement du layout du fichier
-    * ajouter une page html
+[source](https://fr.wikipedia.org/wiki/Ansible_(logiciel))
 
-* réfactorer
-  * variables dans un fichier
-  * variables dans un répertoire avec vars par type de fonction
-  * playbook
-    * extraire la partie conf OS
-    * extraire la partie web 
+## Idempotence
 
-créer le répertoire inventaire
-créer le fichier hosts
-créer le fichier playbook
-lancer vagrant
-constater le pb de clavier
-modifier playbook pour changer le layout
+``
+En mathématiques et en informatique, l'idempotence signifie qu'une opération a le même effet qu'on l'applique une ou plusieurs fois.
+``
+[source](https://fr.wikipedia.org/wiki/Idempotence)
+
+Rejouer plusieurs fois le même playbook, doit toujours aboutir au même état de la machine.
+
+Ex. de cas à gérer:
+* créer un utilisateur sous linux, second ajout du même utilisateur provoque un plantage
+
+## Arborescence:
+
+[Ancible directory layout](https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout)
+
+## pattern/anti pattern
+
+* pattern: installation d'un serveur from scratch
+* anti pattern: mise à jour d'une application: les mises à jours mêmes mineurs ne sont pas idempotent. chaque mise à jour est différente de la précédente.
+
 
 # Hands on!
 
+Le but est d'écrire un playbook qui va installer nginx dans une VM Debian, et on ca y mettre notre page d'index.
+
 ## step_00
 
-Initialisation du projet avec le Vagrantfile
+Initialisation du projet avec le Vagrantfile et le playbook fait un hello au monde en local
 
-## step 01 se connecter à la VM
-Mettre en place l'inventaire
-création du répertoire inventory/vagrant
-création du fichier hosts avec le groupe web
-Ajouter les infos pour vagrant dans le  fichier hosts
+## step_01: se connecter à la VM et faire coucou
+* Mettre en place l'inventaire
+* Créer le répertoire **inventory/vagrant**
+* Créer le fichier **hosts**
+* Ajouter les infos pour vagrant dans le  fichier hosts (avec le groupe web)
 ```
 [web]
-127.0.0.1 ansible_port=2222 ansible_user=vagrant ansible_ssh_private_key_file: .vagrant/machines/default/virtualbox/private_key
+127.0.0.1 ansible_port=2222 ansible_user=vagrant ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key
 ```
 
-## step 02 les host_vars
-Création du fichier 127.0.0.1.yml et y mettre les données du hosts
-Aller sur la VM pour se connecter et constater le mapping
+## step_02: déplacer les infos dans les host_vars
+* Créer le répertoire **inventory/vagrant/host_vars**
+* Y créer le fichier **127.0.0.1.yml** et y mettre les données du hosts:
+```
+ansible_port: 2222
+ansible_user: vagrant
+ansible_ssh_private_key_file: .vagrant/machines/default/virtualbox/private_key
+```
+* Aller sur la VM Virtualbox pour s'y connecter et constater le mapping du clavier
 
-## step 03 remap du clavier
-Changer la valeur de XKBLAYOUT pour la valeur 'fr'
+## step_03: remap du clavier
+Pour changer le layout du clavier, il faut modifier la valeur de la propriété *XKBLAYOUT* dans le fichier */etc/default/keyboard*.
+
+* Changer la valeur de XKBLAYOUT pour la valeur 'fr'
 ```
     - name: change keyboard layout
       become: yes
@@ -66,31 +84,37 @@ Changer la valeur de XKBLAYOUT pour la valeur 'fr'
         regexp: '^XKBLAYOUT='
         line: 'XKBLAYOUT="fr"'
 ```
-aller sur la VM et constater que rien n'a changé
-Reboot nécessaire: ajouter le reboot dans le playbook
+* Aller sur la VM et constater que rien n'a changé
+* Un redémarrage est nécessaire: ajouter le reboot dans le playbook
 ```
     - name: reboot
       become: yes
       reboot:
         msg: "Ansible reboot!"
 ```
-relancer le playbook constater que le reboot se fait: non idempotent
-ajouter le test, pour évaluer la valeur:
+* Exécuter le playbook, la VM est redémarrée, et le clavier est bon.
+* Relancer le playbook constater que le reboot se fait: non idempotent
+* Il faut ajouter un test, pour ne pas redémarrer si la valeur du fichier n'a pas été changé. Pour cela, il faut
+enregistrer la sortie de la modification du fichier:
 ```
       register: kbd_changed
     - name: debug
       debug:
         var: kbd_changed
 ```
-Ajouter le test pour invalider le reboot
+* Lancer le script pour étudier le json retourné
+* Ajouter le test pour ne pas redémarrer sur le fichier *keyboard* n'est pas modifié:
 ```
       when: kbd_changed.changed == true
 ```
-Relancer le test et constater que la vm ne reboot plus.
+* Relancer le test et constater que la vm ne reboot plus.
 
 
-## step 04 Installer nginx
-Commande pour installer package sur debian: apt
+## step_04: Installer nginx
+Sous debian la commande pour installer un paquet est *apt_get install*.
+
+Ceci a été traduit par Ansible:
+* Commande pour installer package sur **Debian**: apt
 ```
     - name: install nginx
       become: yes
@@ -98,11 +122,11 @@ Commande pour installer package sur debian: apt
         name: nginx
         state: present
 ```
-Se connecter à l'url: http://localhost:8080/
+* Se connecter à l'url: [http://localhost:8080/](http://localhost:8080/)
 
-Changer la homepage
-Créer le répertoire files
-Créer un fichier html dans ce répertoire
+C'est bien, mais on veut notre homepage.
+* A la racine du playbook, créer le répertoire **files**
+* Dans ce répertoire, y créer un fichier html nommé **our_index.html**:
 ```
 <html>
 <body>
@@ -110,7 +134,7 @@ Créer un fichier html dans ce répertoire
 </body>
 </html>
 ```
-Déployer le fichier:
+* Pour déployer le fichier, il faut utiliser la tâche **copy**:
 ```
     - name: deploy index file
       become: yes
@@ -119,25 +143,29 @@ Déployer le fichier:
         dest: "/var/www/html/index.html"
 ```
 
-## step 05 refactoring: extraction des variables
+## step_05: refactoring: extraction des variables
 
-Créer le répertoire inventory/group_vars pour y mettre les variables liées au groupe
-Créer le fichier web.yml
-Créer les variables:
+* Créer le répertoire **inventory/group_vars**
+* Créer le fichier **web.yml** pour y mettre les variables liées au groupe
 ```
 kbd_config_file: /etc/default/keyboard
 
 home_page_src: files/our_index.html
 home_page_dest: /var/www/html/index.html
 ```
+* mettre à jour le playbook avec ces variables
 
-## step 06 refactoring: déplacement des variables dans un répertoire dédié au groupe
-Créer le répertoire web, et le fichier all.yml
-all.yml est toujours appelé par Ansible, et les fichiers sont pris par ordre alphabétique -> ceci peut avoir un impacte
+## step_06: refactoring: déplacement des variables dans un répertoire dédié au groupe
+* Créer le répertoire **inventory/group_vars/web**
+* Créer le fichier **all.yml** dans ce répertoire
+
+**all.yml** est toujours appelé par Ansible, et les fichiers sont pris par ordre alphabétique -> ceci peut avoir un impacte
         si des variables d'un fichier *c* ont besoin de variables d'un ficher *a*
-Lancer le script
 
-## step 07 refactoring: séparation des variables par fonctionnalités
-Séparer les variables de all dans 2 fichier: nginx.yml et os.yml
+* Lancer le script
 
-## setp 08 refactoring: faire des includes dans le playbook
+## step_07: refactoring: séparation des variables par fonctionnalités
+Pou plus de visibilité, séparer les variables de all.yml dans 2 fichier: **nginx.yml** et **os.yml**, et supprimer all.yml
+
+## step_08: refactoring: faire des includes dans le playbook
+TODO
