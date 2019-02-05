@@ -1,0 +1,4 @@
+kbd_config_file: /etc/default/keyboard
+
+home_page_src: files/our_index.html
+home_page_dest: /var/www/html/index.html
