@@ -13,20 +13,22 @@
 # Ansible
 
 ## Présentation Ansible
-
+``
 Ansible est une plate-forme logicielle libre pour la configuration et la gestion des ordinateurs. 
 Elle combine le déploiement de logiciels multi-nœuds, l'exécution des tâches ad-hoc, et la gestion de configuration. 
 Elle gère les différents nœuds à travers SSH et ne nécessite l'installation d'aucun logiciel supplémentaire sur ceux-ci. 
 Les modules communiquent via la sortie standard en notation JSON et peuvent être écrits dans n'importe quel langage de 
 programmation. Le système utilise YAML pour exprimer des descriptions réutilisables de systèmes, appelés playbook2.
+``
 
-[source](https://fr.wikipedia.org/wiki/Ansible_(logiciel))
+[source](https://fr.wikipedia.org/wiki/Ansible_(logiciel\))
 
 ## Idempotence
 
 ``
 En mathématiques et en informatique, l'idempotence signifie qu'une opération a le même effet qu'on l'applique une ou plusieurs fois.
 ``
+
 [source](https://fr.wikipedia.org/wiki/Idempotence)
 
 Rejouer plusieurs fois le même playbook, doit toujours aboutir au même état de la machine.
@@ -36,7 +38,7 @@ Ex. de cas à gérer:
 
 ## Arborescence:
 
-[Ancible directory layout](https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout)
+[Ansible directory layout](https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout)
 
 ## pattern/anti pattern
 
