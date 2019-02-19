@@ -48,7 +48,7 @@ Ex. de cas à gérer:
 
 # Hands on!
 
-Le but est d'écrire un playbook qui va installer nginx dans une VM Debian, et on ca y mettre notre page d'index.
+Le but est d'écrire un playbook qui va installer nginx dans une VM Debian, et on va y mettre notre page d'index.
 
 ## step_00: faire hello en local
 
