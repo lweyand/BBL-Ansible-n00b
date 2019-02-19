@@ -50,11 +50,24 @@ Ex. de cas à gérer:
 
 Le but est d'écrire un playbook qui va installer nginx dans une VM Debian, et on ca y mettre notre page d'index.
 
-## step_00
+## step_00: faire hello en local
 
 Initialisation du projet avec le Vagrantfile et le playbook fait un hello au monde en local
 
+Créer un fichier playbook.yml et y mettre le yaml suivant:
+```
+
+---
+
+- hosts: localhost
+  gather_facts: true
+  tasks:
+    - name: echo?
+    command: echo "hello world"
+```
+
 ## step_01: se connecter à la VM et faire coucou
+
 * Mettre en place l'inventaire
 * Créer le répertoire **inventory/vagrant**
 * Créer le fichier **hosts**
@@ -63,6 +76,8 @@ Initialisation du projet avec le Vagrantfile et le playbook fait un hello au mon
 [web]
 127.0.0.1 ansible_port=2222 ansible_user=vagrant ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key
 ```
+
+* Modifier le playbook pour remplacer le *localhost* de hosts, par le group *web*.
 
 ## step_02: déplacer les infos dans les host_vars
 * Créer le répertoire **inventory/vagrant/host_vars**
